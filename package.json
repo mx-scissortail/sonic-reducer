@@ -1,0 +1,18 @@
+{
+  "name": "sonic-reducer",
+  "version": "0.1.0",
+  "description": "An experimental extension to zine, inspired by Redux and various FRP/Dataflow frameworks",
+  "main": "index.js",
+  "files": [
+    "index.js"
+  ],
+  "dependencies": {
+    "zine": "^1.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/j-s-n/sonic-reducer.git"
+  },
+  "author": "J. S. Nelson",
+  "license": "MIT"
+}
