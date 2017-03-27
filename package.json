@@ -9,6 +9,15 @@
   "dependencies": {
     "zine": "^1.1.0"
   },
+  "devDependencies": {
+    "babel-preset-env": "^1.2.2",
+    "babel-register": "^6.24.0",
+    "mocha": "^3.2.0",
+    "react": "^15.4.2"
+  },
+  "scripts": {
+    "test": "mocha --require test/setup.js --compilers js:babel-register test/test.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/j-s-n/sonic-reducer.git"

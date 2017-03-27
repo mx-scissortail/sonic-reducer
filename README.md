@@ -9,7 +9,7 @@ See the (forthcoming) Medium article "State Architecture Patterns in React, Part
 ## Installation
 
 ```
-npm install sonic-reducer
+npm install sonic-reducer --save
 ```
 
 ## API: Constants
