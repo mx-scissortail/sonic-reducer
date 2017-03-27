@@ -86,7 +86,7 @@ export function combine (atomMap) {
     return state;
   }
 
-  for (var key in atomMap) {
+  for (let key in atomMap) {
     var atom = atomMap[key];
     zine.subscribe(atom, function (newValue) {
       if (newValue != nah) {
@@ -156,8 +156,8 @@ export function link (...atoms) {
 
 export function mapObject (func, obj) {
   var newObj = {};
-  for (var key in obj) {
-    newObj[key] = func(newObj[key], key);
+  for (let key in obj) {
+    newObj[key] = func(obj[key], key);
   }
   return newObj;
 }
