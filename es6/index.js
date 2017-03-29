@@ -1,4 +1,4 @@
-import zine from 'zine';
+import {subscribe, publish, connector, propConnector} from 'zine/es6';
 
 // Constants
 
@@ -18,7 +18,7 @@ export function defineAtom (reducer, initialState) {
       var newState = reducer(state, value);
       if (newState != nah) {
         state = newState;
-        zine.publish(atom, state);
+        publish(atom, state);
       }
     }
     return state;
@@ -36,13 +36,13 @@ export function defineFormula (formula, ...atoms) {
   }
 
   values = atoms.map(function (atom, index) {
-    zine.subscribe(atom, function (newValue) {
+    subscribe(atom, function (newValue) {
       if (newValue != nah) {
         values[index] = newValue;
         var newState = formula(...values);
         if (newState != nah) {
           state = newState;
-          zine.publish(boundFormula, state);
+          publish(boundFormula, state);
         }
       }
     });
@@ -63,7 +63,7 @@ export function defineValueAtom (initialState) {
   atom.update = function (value) {
     if (value !== nah) {
       state = value;
-      zine.publish(atom, state);
+      publish(atom, state);
     }
     return state;
   };
@@ -88,10 +88,10 @@ export function combine (atomMap) {
 
   for (let key in atomMap) {
     var atom = atomMap[key];
-    zine.subscribe(atom, function (newValue) {
+    subscribe(atom, function (newValue) {
       if (newValue != nah) {
         state = merge(state, {[key]: newValue});
-        zine.publish(combinator, state);
+        publish(combinator, state);
       }
     });
     state[key] = atom();
@@ -111,11 +111,11 @@ function call (sub) { // not exported
 }
 
 export function atomConnector (subscriptionSpec) {
-  return zine.connector(subscriptionSpec, call);
+  return connector(subscriptionSpec, call);
 }
 
 export function atomPropConnector (prop) {
-  return zine.propConnector(prop, call);
+  return propConnector(prop, call);
 }
 
 // Utility functions
@@ -149,7 +149,7 @@ export function lazify (fn) {
 
 export function link (...atoms) {
   return atoms.reduce(function (a, b) {
-    zine.subscribe(a, b.update);
+    subscribe(a, b.update);
     return b;
   });
 }
@@ -165,3 +165,5 @@ export function mapObject (func, obj) {
 export function merge (...objects) {
   return Object.assign({}, ...objects);
 }
+
+export default {nah, defineAtom, defineFormula, defineValueAtom, atomify, combine, sink, atomConnector, atomPropConnector, actionSwitch, bindActionCreator, lazify, link, mapObject, merge};

@@ -1,61 +1,74 @@
-import * as sr from '../index.js';
+import React from 'react';
+import {mount} from 'enzyme';
+import sinon from 'sinon';
+import createMockDOM from 'jsdom-global';
+
+import sr from '../index.js';
 import zine from 'zine';
+
+createMockDOM();
+
+const ValueDiv = ({value}) => <div className={`test ${value}`} />;
+const WrappedValueDiv = ({store: {value}}) => <div className={`test ${value}`} />;
+
+const mountTest = (component, props) => mount(React.createElement(component, props));
+const testClass = (wrapper, cn) => assert(wrapper.find('.test').hasClass(cn));
 
 // defineAtom
 describe('defineAtom', function () {
   it('retains initial state', function () {
-    var atom = sr.defineAtom((state, x) => state + x, 0);
+    const atom = sr.defineAtom((state, x) => state + x, 0);
     assert(atom() == 0);
   });
 
   it('updates state w/ reducer', function () {
-    var atom = sr.defineAtom((state, x) => state + x, 0);
+    const atom = sr.defineAtom((state, x) => state + x, 0);
     assert(atom() == 0);
     atom.update(1);
     assert(atom() == 1);
   });
 
   it('ignores "nah" as input to reducer', function () {
-    var atom = sr.defineAtom((state, x) => x, 0);
-    var flag = 0;
-    zine.subscribe(atom, (x) => {flag = x;});
+    const atom = sr.defineAtom((state, x) => x, 0);
+    const callback = sinon.spy();
+    zine.subscribe(atom, callback);
     atom.update(sr.nah);
     assert(atom() == 0);
-    assert(flag == 0);
+    assert(!callback.called);
   });
 
   it('ignores "nah" output from reducer', function () {
-    var atom = sr.defineAtom((state, x) => sr.nah, 0);
-    var flag = 0;
-    zine.subscribe(atom, (x) => {flag = x;});
+    const atom = sr.defineAtom((state, x) => sr.nah, 0);
+    const callback = sinon.spy();
+    zine.subscribe(atom, callback);
     atom.update(1);
     assert(atom() == 0);
-    assert(flag == 0);
+    assert(!callback.called);
   });
 
   it('publishes on update', function () {
-    var atom = sr.defineAtom((state, x) => state + x, 0);
-    var flag = 0;
-    zine.subscribe(atom, (x) => {flag = x;});
+    const atom = sr.defineAtom((state, x) => state + x, 0);
+    const callback = sinon.spy();
+    zine.subscribe(atom, callback);
     atom.update(1);
-    assert(flag == 1);
+    assert(callback.calledOnce);
   });
 });
 
 // defineFormula
 describe('defineFormula', function () {
   it('gets initial state', function () {
-    var atomA = sr.defineAtom((state, x) => state + x, 0);
-    var atomB = sr.defineAtom((state, x) => state * x, 2);
-    var formula = sr.defineFormula((a, b) => `a: ${a}, b: ${b}`, atomA, atomB);
+    const atomA = sr.defineAtom((state, x) => state + x, 0);
+    const atomB = sr.defineAtom((state, x) => state * x, 2);
+    const formula = sr.defineFormula((a, b) => `a: ${a}, b: ${b}`, atomA, atomB);
 
     assert(formula() == 'a: 0, b: 2');
   });
 
   it('updates state on atom argument change', function () {
-    var atomA = sr.defineAtom((state, x) => state + x, 0);
-    var atomB = sr.defineAtom((state, x) => state * x, 2);
-    var formula = sr.defineFormula((a, b) => `a: ${a}, b: ${b}`, atomA, atomB);
+    const atomA = sr.defineAtom((state, x) => state + x, 0);
+    const atomB = sr.defineAtom((state, x) => state * x, 2);
+    const formula = sr.defineFormula((a, b) => `a: ${a}, b: ${b}`, atomA, atomB);
 
     atomA.update(1);
     assert(formula() == 'a: 1, b: 2');
@@ -64,67 +77,67 @@ describe('defineFormula', function () {
   });
 
   it('ignores "nah" output from formula function', function () {
-    var atomA = sr.defineValueAtom(true);
-    var atomB = sr.defineValueAtom(true)
-    var formula = sr.defineFormula((a, b) => ((a && b) || sr.nah), atomA, atomB);
-    var flag = false;
+    const atomA = sr.defineValueAtom(true);
+    const atomB = sr.defineValueAtom(true)
+    const formula = sr.defineFormula((a, b) => ((a && b) || sr.nah), atomA, atomB);
+    const callback = sinon.spy();
 
-    zine.subscribe(formula, (x) => {flag = x;});
+    zine.subscribe(formula, callback);
     assert(formula() === true);
     atomA.update(false);
     assert(formula() === true);
-    assert(!flag);
+    assert(!callback.called);
   });
 
   // TODO: test ignoring 'nah' from atom argument?
 
   it('publishes on update', function () {
-    var atomA = sr.defineAtom((state, x) => state + x, 0);
-    var formula = sr.defineFormula((a) => `a: ${a}`, atomA);
-    var flag = false;
+    const atomA = sr.defineAtom((state, x) => state + x, 0);
+    const formula = sr.defineFormula((a) => `a: ${a}`, atomA);
+    const callback = sinon.spy();
 
-    zine.subscribe(formula, (x) => {flag = x;});
+    zine.subscribe(formula, callback);
     atomA.update(1);
-    assert(flag == 'a: 1');
+    assert(callback.calledWith('a: 1'));
   });
 });
 
 // defineValueAtom
 describe('defineValueAtom', function () {
   it('retains initial state', function () {
-    var atom = sr.defineValueAtom(0);
+    const atom = sr.defineValueAtom(0);
     assert(atom() == 0);
   });
 
   it('updates state', function () {
-    var atom = sr.defineValueAtom(0);
+    const atom = sr.defineValueAtom(0);
     assert(atom() == 0);
     atom.update(1);
     assert(atom() == 1);
   });
 
   it('ignores "nah" as input', function () {
-    var atom = sr.defineValueAtom(0);
-    var flag = false;
-    zine.subscribe(atom, (x) => {flag = x;});
+    const atom = sr.defineValueAtom(0);
+    const callback = sinon.spy();
+    zine.subscribe(atom, callback);
     atom.update(sr.nah);
     assert(atom() == 0);
-    assert(!flag);
+    assert(!callback.called);
   });
 
   it('publishes on update', function () {
-    var atom = sr.defineValueAtom(0);
-    var flag = false;
-    zine.subscribe(atom, (x) => {flag = x;});
+    const atom = sr.defineValueAtom(0);
+    const callback = sinon.spy();
+    zine.subscribe(atom, callback);
     atom.update(1);
-    assert(flag == 1);
+    assert(callback.calledOnce);
   });
 });
 
 // atomify
 describe('atomify', function () {
   it('updates state w/ supplied function', function () {
-    var atom = sr.atomify((x) => x);
+    const atom = sr.atomify((x) => x);
     assert(atom() === undefined);
     atom.update(1);
     assert(atom() == 1);
@@ -134,52 +147,52 @@ describe('atomify', function () {
 // combine
 describe('combine', function () {
   it('combines atoms', function () {
-    var fooAtom = sr.defineValueAtom(0);
-    var barAtom = sr.defineValueAtom(1);
-    var combined = sr.combine({
-      foo: fooAtom,
-      bar: barAtom
+    const atomA = sr.defineValueAtom(0);
+    const atomB = sr.defineValueAtom(1);
+    const combined = sr.combine({
+      a: atomA,
+      b: atomB
     });
 
-    assert(combined().foo == 0);
-    assert(combined().bar == 1);
+    assert(combined().a == 0);
+    assert(combined().b == 1);
   });
 
   it('updates on change', function () {
-    var fooAtom = sr.defineValueAtom(0);
-    var barAtom = sr.defineValueAtom(1);
-    var combined = sr.combine({
-      foo: fooAtom,
-      bar: barAtom
+    const atomA = sr.defineValueAtom(0);
+    const atomB = sr.defineValueAtom(1);
+    const combined = sr.combine({
+      a: atomA,
+      b: atomB
     });
 
-    assert(combined().foo == 0);
-    fooAtom.update(2);
-    assert(combined().foo == 2);
-    assert(combined().bar == 1);
+    assert(combined().a == 0);
+    atomA.update(2);
+    assert(combined().a == 2);
+    assert(combined().b == 1);
   });
 
   it('publishes on update', function () {
-    var flag = false;
-    var fooAtom = sr.defineValueAtom(0);
-    var combined = sr.combine({
-      foo: fooAtom
+    const callback = sinon.spy();
+    const atomA = sr.defineValueAtom(0);
+    const combined = sr.combine({
+      a: atomA
     });
-    zine.subscribe(combined, () => {flag = true;});
+    zine.subscribe(combined, callback);
 
-    assert(!flag);
-    fooAtom.update(2);
-    assert(flag);
+    assert(!callback.called);
+    atomA.update(2);
+    assert(callback.called);
   });
 
   it('updates without mutation', function () {
-    var fooAtom = sr.defineValueAtom(0);
-    var combined = sr.combine({
-      foo: fooAtom
+    const atomA = sr.defineValueAtom(0);
+    const combined = sr.combine({
+      a: atomA
     });
 
     var oldState = combined();
-    fooAtom.update(1);
+    atomA.update(1);
     assert(combined() !== oldState);
   });
 });
@@ -187,37 +200,45 @@ describe('combine', function () {
 // sink
 describe('sink', function () {
   it('sinks atoms', function () {
-    var fooAtom = sr.defineValueAtom({foo: 0, bar: 1});
-    var barAtom = sr.defineValueAtom({bar: 2});
-    var sunk = sr.sink(fooAtom, barAtom);
+    const atomA = sr.defineValueAtom({a: 0, b: 1});
+    const atomB = sr.defineValueAtom({b: 2});
+    const sunk = sr.sink(atomA, atomB);
 
-    assert(sunk().foo == 0);
-    assert(sunk().bar == 2);
+    assert(sunk().a == 0);
+    assert(sunk().b == 2);
   });
 
   it('updates on sunk atom change', function () {
-    var fooAtom = sr.defineValueAtom({foo: 0, bar: 1});
-    var barAtom = sr.defineValueAtom({bar: 2});
-    var sunk = sr.sink(fooAtom, barAtom);
+    const atomA = sr.defineValueAtom({a: 0, b: 1});
+    const atomB = sr.defineValueAtom({b: 2});
+    const sunk = sr.sink(atomA, atomB);
 
-    fooAtom.update({foo: 0, bar: 1}); // this shouldn't do anything because barAtom overwrites it
-    assert(sunk().bar == 2);
-    barAtom.update({bar: 3});
-    assert(sunk().bar == 3);
+    atomA.update({a: 0, b: 1}); // this shouldn't do anything because atomB overwrites it
+    assert(sunk().b == 2);
+    atomB.update({b: 3});
+    assert(sunk().b == 3);
   });
 });
 
 // atomConnector
 describe('atomConnector', function () {
-  it('', function () {
-
+  it('updates component on atom update', function () {
+    const atom = sr.defineValueAtom({value: 'untouched'});
+    const wrapper = mountTest(sr.atomConnector(atom)(ValueDiv));
+    testClass(wrapper, 'untouched');
+    atom.update({value: 'touched'});
+    testClass(wrapper, 'touched');
   });
 });
 
 // atomPropConnector
 describe('atomPropConnector', function () {
-  it('', function () {
-
+  it('updates component on atom update w/ prop name wrapping', function () {
+    const atom = sr.defineValueAtom({value: 'untouched'});
+    const wrapper = mountTest(sr.atomPropConnector('store')(WrappedValueDiv), {store: atom});
+    testClass(wrapper, 'untouched');
+    atom.update({value: 'touched'});
+    testClass(wrapper, 'touched');
   });
 });
 
@@ -225,35 +246,35 @@ describe('atomPropConnector', function () {
 // actionSwitch
 describe('actionSwitch', function () {
   it('switches when key is present, returns "nah" otherwise', function () {
-    var aSwitch = sr.actionSwitch({
-      foo: (state, x) => x.bar + state.bar
+    const aSwitch = sr.actionSwitch({
+      action: (state, x) => x.value + state.value
     });
 
-    assert(aSwitch({bar: 1}, {type: 'foo', bar: 2}) == 3);
-    assert(aSwitch({bar: 1}, {type: 'baz', bar: 1}) == sr.nah);
+    assert(aSwitch({value: 1}, {type: 'action', value: 2}) == 3);
+    assert(aSwitch({value: 1}, {type: 'fakeAction', value: 1}) == sr.nah);
   });
 });
 
 // bindActionCreator
 describe('bindActionCreator', function () {
   it('composes', function () {
-    var flag = 0;
-    var dispatch = (x) => {flag = x; return x;};
-    var boundFun = sr.bindActionCreator(dispatch, (x, y) => x + y);
+    const callback = sinon.spy();
+    const dispatch = (x) => {callback(x); return x;};
+    const boundFun = sr.bindActionCreator(dispatch, (x, y) => x + y);
     assert(boundFun(1, 2) == 3);
-    assert(flag == 3);
+    assert(callback.calledWith(3));
   });
 
   it('curries', function () {
-    var flag = 0;
-    var dispatch = (x) => {flag = x; return x;};
-    var binder = sr.bindActionCreator(dispatch);
-    var boundFunA = binder((x, y) => x + y);
-    var boundFunB = binder((x, y) => x * y);
+    const callback = sinon.spy();
+    const dispatch = (x) => {callback(x); return x;};
+    const binder = sr.bindActionCreator(dispatch);
+    const boundFunA = binder((x, y) => x + y);
+    const boundFunB = binder((x, y) => x * y);
     assert(boundFunA(1, 2) == 3);
-    assert(flag == 3);
+    assert(callback.calledWith(3));
     assert(boundFunB(2, 3) == 6);
-    assert(flag == 6);
+    assert(callback.calledWith(6));
   });
 });
 
@@ -270,9 +291,9 @@ describe('lazify', function () {
 // link
 describe('link', function () {
   it('subscribes atoms in a chain', function () {
-    var atomA = sr.defineValueAtom(0);
-    var atomB = sr.atomify((x) => x * 2);
-    var atomC = sr.defineAtom((state, x) => state + x, 1);
+    const atomA = sr.defineValueAtom(0);
+    const atomB = sr.atomify((x) => x * 2);
+    const atomC = sr.defineAtom((state, x) => state + x, 1);
     sr.link(atomA, atomB, atomC);
     assert(atomA() == 0);
     assert(atomB() === undefined);
@@ -291,10 +312,10 @@ describe('link', function () {
 // mapObject
 describe('mapObject', function () {
   it('applies supplied function to each key', function () {
-    var obj = {foo: 1, bar: 2};
-    var newObj = sr.mapObject((value, key) => `${key} ${value}`, obj);
-    assert(newObj.foo == 'foo 1');
-    assert(newObj.bar == 'bar 2');
+    const obj = {a: 1, b: 2};
+    const newObj = sr.mapObject((value, key) => `${key} ${value}`, obj);
+    assert(newObj.a == 'a 1');
+    assert(newObj.b == 'b 2');
   });
 
   // TODO: test inheritance chain?
@@ -303,12 +324,12 @@ describe('mapObject', function () {
 // merge
 describe('merge', function () {
   it('merges, and in the appropriate order', function () {
-    var a = {foo: 1, bar: 0};
-    var b = {bar: 2};
-    var c = sr.merge(a, b);
+    const a = {a: 1, b: 0};
+    const b = {b: 2};
+    const c = sr.merge(a, b);
 
-    assert(c.foo == 1);
-    assert(c.bar == 2);
+    assert(c.a == 1);
+    assert(c.b == 2);
     assert(c != a && c != b);
   });
 });

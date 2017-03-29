@@ -12,6 +12,22 @@ See the (forthcoming) Medium article "State Architecture Patterns in React, Part
 npm install sonic-reducer --save
 ```
 
+## Importing
+
+Sonic Reducer is written in ES6 and transpiled to ES5 for compatibility. Both versions are included in the npm package. If you're using ES5, do this:
+```
+var SonicReducer = require('sonic-reducer');
+```
+If you're using ES6+, you can include the original sources by importing the module like this:
+```
+import SonicReducer from 'sonic-reducer/es6';
+```
+...or importing the functions it exports individually, e.g.
+```
+import {defineAtom, atomConnector /* ...etc */} from 'sonic-reducer/es6';
+```
+Importing the ES5 source from ES6 should work fine too, but will likely add a tiny amount of overhead if you're transpiling anyway.
+
 ## API: Constants
 
 ### `nah`

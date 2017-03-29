@@ -1,5 +1,13 @@
 {
   "presets": [
-    "env"
+    "es2015",
+    "react"
+  ],
+  "plugins": [
+    ["module-resolver", {
+      "alias": {
+        "zine/es6": "zine"
+      }
+    }]
   ]
 }
