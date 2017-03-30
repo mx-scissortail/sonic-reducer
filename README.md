@@ -4,7 +4,7 @@ Sonic Reducer is an experimental extension to [zine](https://github.com/j-s-n/zi
 
 Sonic Reducer is in pre-alpha state right now, so maybe don't depend on it. At present, it should probably be considered a proof-of-concept or a source of ideas. Unlike [zine](https://github.com/j-s-n/zine), it’s never been tested in production. It doesn’t presently emit useful errors or warnings, nor has it been optimized in any way. Furthermore, its API is likely to change substantially before the 1.0 release.
 
-See the (forthcoming) Medium article "State Architecture Patterns in React, Part 4: Purity, Flux-duality and Dataflow" for an explanation.
+See the Medium article "[State Architecture Patterns in React, Part 4: Purity, Flux-duality and Dataflow](https://medium.com/@skylernelson_64801/state-architecture-patterns-in-react-part-4-purity-flux-duality-and-dataflow-d06016b3379a)" for an explanation.
 
 ## Installation
 
