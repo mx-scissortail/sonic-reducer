@@ -1,6 +1,6 @@
 {
   "name": "sonic-reducer",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "An experimental extension to zine, inspired by Redux and various FRP/Dataflow frameworks",
   "main": "index.js",
   "files": [
