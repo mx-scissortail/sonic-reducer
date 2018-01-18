@@ -1,4 +1,6 @@
-# Sonic Reducer
+# Sonic Reducer [Deprecated!]
+
+WARNING: Sonic Reducer has been deprecated for the time being - it's largely unnecessary given some recent updates to zine.
 
 Sonic Reducer is an experimental extension to [zine](https://github.com/j-s-n/zine), inspired by [Redux](https://github.com/reactjs/redux) and various FRP/Dataflow frameworks.
 
